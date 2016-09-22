@@ -1,0 +1,22 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+
+(1..2).each do |i|
+	config.vm.define "#{i}" do |ipa|
+		ipa.vm.box = "centos/7"
+		ipa.vm.synced_folder ".", "/mnt/vagrant"
+		ipa.vm.provider "virtualbox" do |vbox|
+			vbox.name = "ipa#{i}"
+			vbox.memory = 512
+			vbox.cpus = 2
+		end
+		ipa.vm.network "private_network", ip: "172.16.1.1#{i}"
+		ipa.vm.hostname = "ipa#{i}.rhce.lab"
+		ipa.vm.provision "ansible" do |ansible|
+			ansible.playbook = "freeipa.yml"
+		end
+	end
+end
+end
