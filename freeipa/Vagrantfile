@@ -5,7 +5,8 @@ Vagrant.configure(2) do |config|
 
 (1..2).each do |i|
 	config.vm.define "#{i}" do |ipa|
-		ipa.vm.box = "centos/7"
+		#ipa.vm.box = "centos/7"
+		ipa.vm.box = "geerlingguy/centos7"
 		ipa.vm.synced_folder ".", "/mnt/vagrant"
 		ipa.vm.provider "virtualbox" do |vbox|
 			vbox.name = "ipa#{i}"
