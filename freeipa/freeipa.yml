@@ -19,10 +19,25 @@
     yum: name=firewalld state=latest
   - name: Enable firewalld
     service: name=firewalld enabled=yes
-  - name: Install FreeIPA server packages
-    yum: name=[ 'ipa-server', 'ipa-server-dns', 'bind', 'bind-dyndb-ldap' ] state=latest
+  - name: Start firewalld.service
+    service: name=firewalld state=started
   - name: Open firewall for FreeIPA's ports
-    command: firewall-cmd --add-service={ssh,dns,freeipa-ldap,freeipa-ldaps,freeipa-replication} --permanent
+    firewalld: permanent=true state=enabled service={{ item }}
+    with_items:
+      - ssh
+      - dns
+      - freeipa-ldap
+      - freeipa-ldaps
+      - freeipa-replication
+#  - name: Open firewall for FreeIPA's ports
+#   command: firewall-cmd --add-service={ssh,dns,freeipa-ldap,freeipa-ldaps,freeipa-replication} --permanent
   - name: Reload firewall rules
     command: firewall-cmd --reload
+  - name: Install FreeIPA server packages
+    yum: state=latest name={{ item }}
+    with_items:
+            - ipa-server
+            - ipa-server-dns
+            - bind
+            - bind-dyndb-ldap
 ...
