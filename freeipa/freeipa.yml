@@ -22,5 +22,7 @@
   - name: Install FreeIPA server packages
     yum: name=[ 'ipa-server', 'ipa-server-dns', 'bind', 'bind-dyndb-ldap' ] state=latest
   - name: Open firewall for FreeIPA's ports
-    command: firewall-cmd --add-service=http --permanent
+    command: firewall-cmd --add-service={ssh,dns,freeipa-ldap,freeipa-ldaps,freeipa-replication} --permanent
+  - name: Reload firewall rules
+    command: firewall-cmd --reload
 ...
