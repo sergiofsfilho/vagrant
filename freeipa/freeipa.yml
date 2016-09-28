@@ -33,11 +33,11 @@
 #   command: firewall-cmd --add-service={ssh,dns,freeipa-ldap,freeipa-ldaps,freeipa-replication} --permanent
   - name: Reload firewall rules
     command: firewall-cmd --reload
-  - name: Install FreeIPA server packages
-    yum: state=latest name={{ item }}
-    with_items:
-            - ipa-server
-            - ipa-server-dns
-            - bind
-            - bind-dyndb-ldap
+#  - name: Install FreeIPA server packages
+#   yum: state=latest name={{ item }}
+#   with_items:
+#           - ipa-server
+#           - ipa-server-dns
+#           - bind
+#           - bind-dyndb-ldap
 ...
