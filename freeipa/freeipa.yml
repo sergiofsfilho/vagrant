@@ -12,7 +12,7 @@
       - tcpdump
       - tree
       - bind-utils
-  
+      - mlocate
   - name: Set SELINUX to permissive
     selinux: policy=targeted state=permissive
 
