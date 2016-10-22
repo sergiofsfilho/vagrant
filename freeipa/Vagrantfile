@@ -5,12 +5,10 @@ Vagrant.configure(2) do |config|
 
 (1..3).each do |i|
 	config.vm.define "ipa#{i}" do |ipa|
-		ipa.vm.box = "centos/7"
-		#ipa.vm.box = "geerlingguy/centos7"
-		#ipa.vm.synced_folder ".", "/mnt/vagrant"
+		ipa.vm.box = "fedora/24-cloud-base"
 		ipa.vm.provider "virtualbox" do |vbox|
 			vbox.name = "ipa#{i}"
-			vbox.memory = 640
+			vbox.memory = 1768
 			vbox.cpus = 2
 		end
 		ipa.vm.network "private_network", ip: "172.16.101.1#{i}"
