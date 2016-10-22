@@ -1,7 +1,9 @@
 ---
-- hosts: all
-  become: yes
+- hosts: all 
+  remote_user: vagrant
+  gather_facts: false
   become_user: root
+  become: yes 
   tasks:
   - name: Install basic packages
     yum: state=latest name={{ item }}
