@@ -1,10 +1,18 @@
 ---
 - hosts: all
-  become: yes
+  remote_user: vagrant
+  gather_facts: false
   become_user: root
+  become: yes
   tasks:
+  - name: Install Python and deps for Ansible modules
+    raw: dnf install -y python2 python2-dnf libselinux-python
+
+  - name: Enable dnf copr @freeipa/freeipa-4-4
+    raw:  dnf copr enable @freeipa/freeipa-4-4 -y
+
   - name: Install basic packages
-    yum: state=latest name={{ item }}
+    dnf: state=latest name={{ item }}
     with_items:
       - bash-completion
       - vim
@@ -13,11 +21,12 @@
       - tree
       - bind-utils
       - mlocate
+      - python-firewall
+      - cockpit
+      - firewalld
+
   - name: Set SELINUX to permissive
     selinux: policy=targeted state=permissive
-
-  - name: Install Firewalld
-    yum: name=firewalld state=latest
 
   - name: Enable firewalld
     service: name=firewalld enabled=yes
@@ -25,9 +34,24 @@
   - name: Start firewalld.service
     service: name=firewalld state=started
 
+  - name: Open firewall for FreeIPA's ports (7389/tcp)
+    firewalld: permanent=true state=enabled port={{ item }}
+    with_items:
+      - 7389/tcp
+      - 88/udp
+      - 464/udp
+      - 123/udp
+
   - name: Open firewall for FreeIPA's ports
     firewalld: permanent=true state=enabled service={{ item }}
     with_items:
+      - ntp
+      - http
+      - https
+      - ldap
+      - ldaps
+      - kerberos
+      - kpasswd
       - ssh
       - dns
       - freeipa-ldap
@@ -38,7 +62,7 @@
     command: firewall-cmd --reload
 
   - name: Install FreeIPA server packages
-    yum: state=latest name={{ item }}
+    dnf: state=latest name={{ item }}
     with_items:
       - ipa-server
       - ipa-server-dns
