@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+	# FreeIPA server definitions
+	config.vm.define "ipa1.freeipa.lab" do |ipa|
+		ipa.vm.box = "fedora/24-cloud-base"
+		ipa.vm.provider "virtualbox" do |vbox|
+			vbox.name = "ipa1.freeipa.lab"
+			vbox.memory = 2048
+			vbox.cpus = 2
+		end
+		ipa.vm.network "private_network", ip: "172.16.101.11"
+		ipa.vm.hostname = "ipa1.freeipa.lab"
+		ipa.vm.provision "ansible" do |ansible|
+			ansible.playbook = "ipa-server-fedora24.yml"
+		end
+	end
+	
+	# FreeIPA client definitions
+	config.vm.define "ipa2.freeipa.lab" do |ipa|
+		ipa.vm.box = "centos/7"
+		ipa.vm.provider "virtualbox" do |vbox|
+			vbox.name = "ipa2.freeipa.lab"
+			vbox.memory = 2048
+			vbox.cpus = 2
+		end
+		ipa.vm.network "private_network", ip: "172.16.101.12"
+		ipa.vm.hostname = "ipa2.freeipa.lab"
+		ipa.vm.provision "ansible" do |ansible|
+			ansible.playbook = "ipa-client-centos7.yml"
+		end
+	end
+end

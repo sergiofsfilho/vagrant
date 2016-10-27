@@ -1,0 +1,89 @@
+---
+- hosts: all
+  remote_user: vagrant
+  gather_facts: false
+  become_user: root
+  become: yes
+  tasks:
+  - name: Install Python and deps for Ansible modules
+    raw: dnf install -y python2 python2-dnf libselinux-python
+
+  - name: Enable dnf copr @freeipa/freeipa-4-3
+    raw:  dnf copr enable @freeipa/freeipa-4-3 -y
+
+  - name: Set hostname
+    hostname: name="ipa1.freeipa.lab"
+
+  - name: Echo hostanme
+    shell: hostname
+
+  - name: Update all packages
+    dnf: name=* state=latest
+  - name: Install basic packages
+    dnf: state=latest name={{ item }}
+    with_items:
+      - bash-completion
+      - vim
+      - lsof
+      - tcpdump
+      - tree
+      - bind-utils
+      - mlocate
+      - python-firewall
+      - cockpit
+      - firewalld
+
+  - name: Set SELINUX to permissive
+    selinux: policy=targeted state=permissive
+
+  - name: Enable firewalld
+    service: name=firewalld enabled=yes
+
+  - name: Start firewalld.service
+    service: name=firewalld state=started
+
+  # FreeIPA Ports
+  # ----------------------------------
+  # Service    | Ports   | Type
+  # HTTP/HTTPS | 80,443  | TCP
+  # LDAP/LDAPS | 389,636 | TCP
+  # Kerberos   | 88,464  | TCP and UDP
+  # DNS        | 53      | TCP and UDP
+  # NTP        | 123     | UDP
+  # Dogtag     | 7389    | TCP
+
+  - name: Open firewall for FreeIPA's ports (7389/tcp)
+    firewalld: permanent=true state=enabled port={{ item }}
+    with_items:
+      - 7389/tcp
+      - 88/udp
+      - 464/udp
+      - 123/udp
+
+  - name: Open firewall for FreeIPA's ports
+    firewalld: permanent=true state=enabled service={{ item }}
+    with_items:
+      - ntp
+      - http
+      - https
+      - ldap
+      - ldaps
+      - kerberos
+      - kpasswd
+      - ssh
+      - dns
+      - freeipa-ldap
+      - freeipa-ldaps
+      - freeipa-replication
+
+  - name: Reload firewall rules
+    command: firewall-cmd --reload
+
+  - name: Install FreeIPA server packages
+    dnf: state=latest name={{ item }}
+    with_items:
+      - freeipa-server
+      - freeipa-server-dns
+      - bind
+      - bind-dyndb-ldap
+...

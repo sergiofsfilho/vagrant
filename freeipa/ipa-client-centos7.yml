@@ -1,0 +1,46 @@
+---
+- name: Install FreeIPA client
+  hosts: all
+  remote_user: vagrant
+  gather_facts: false
+  become_user: root
+  become: yes
+  tasks:
+
+  - name: Set hostname
+    hostname: name="ipa2.freeipa.lab"
+  - name: Echo hostname
+    shell: hostname
+
+  - name: Update all packages
+    yum: name=* state=latest
+  - name: Install basic packages
+    yum: state=latest name={{ item }}
+    with_items:
+      - bash-completion
+      - vim
+      - lsof
+      - tcpdump
+      - tree
+      - bind-utils
+      - mlocate
+      - python-firewall
+      - firewalld
+
+  #  - name: Set SELINUX to permissive
+  #    selinux: policy=targeted state=permissive
+
+  #  - name: Enable firewalld
+  #    service: name=firewalld enabled=yes
+
+  #  - name: Start firewalld.service
+  #    service: name=firewalld state=started
+
+  #  - name: Reload firewall rules
+  #    command: firewall-cmd --reload
+
+  - name: Install FreeIPA client packages
+    yum: state=latest name={{ item }}
+    with_items:
+      - ipa-client
+...
