@@ -1,0 +1,52 @@
+---
+- name: Install DNS Master (bind)
+  hosts: all
+  remote_user: vagrant
+  gather_facts: false
+  become_user: root
+  become: yes
+  tasks:
+
+  - name: Set hostname
+    hostname: name="node1.dns.lab"
+
+  - name: Echo hostname
+    shell: hostname
+
+  - name: Update all packages
+    yum: name=* state=latest
+
+  - name: Install basic packages
+    yum: state=latest name={{ item }}
+    with_items:
+      - bash-completion
+      - vim
+      - lsof
+      - tcpdump
+      - tree
+      - bind-utils
+      - mlocate
+      - python-firewall
+      - firewalld
+      - libselinux-python
+
+  - name: Set SELinux to permissive
+    selinux: policy=targeted state=permissive
+
+  - name: Enable Firewalld
+    service: name=firewalld enabled=yes
+
+  - name: Start firewalld.service
+    service: name=firewalld state=started
+
+  - name: Open firewall for DNS
+    firewalld: service=dns permanent=true state=enabled
+  
+  - name: Install bind packages
+    yum: state=latest name={{ item }}
+    with_items:
+      - bind
+
+  - name: Reload firewall rules
+    command: firewall-cmd --reload
+...

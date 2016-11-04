@@ -1,0 +1,53 @@
+---
+- hosts: all 
+  remote_user: vagrant
+  gather_facts: false
+  become_user: root
+  become: yes 
+  tasks:
+  - name: Install basic packages
+    yum: state=latest name={{ item }}
+    with_items:
+      - bash-completion
+      - vim
+      - lsof
+      - tcpdump
+      - tree
+      - bind-utils
+
+  - name: Set hostname to /etc/hosts
+    lineinfile: dest=/etc/hosts line="172.16.101.11 node1 node1.cluster.lab"
+    lineinfile: dest=/etc/hosts line="172.16.101.12 node2 node2.cluster.lab"
+
+  - name: Set SELINUX to permissive
+    selinux: policy=targeted state=permissive
+
+  - name: Install Firewalld
+    yum: name=firewalld state=latest
+  - name: Enable firewalld
+    service: name=firewalld enabled=yes
+  - name: Start firewalld.service
+    service: name=firewalld state=started
+  - name: Open firewall for FreeIPA's ports
+    firewalld: permanent=true state=enabled service={{ item }}
+    with_items:
+      - high-availability
+  - name: Reload firewall rules
+    command: firewall-cmd --reload
+
+  - name: Install Pacemaker packages
+    yum: state=latest name={{ item }}
+    with_items:
+      - pacemaker
+      - pcs
+      - resource-agents
+
+# Enable and Start Pacemaker
+  - name: Enable Pacemaker
+    service: name=pcsd enabled=yes
+  - name: Start Pacemaker
+    service: name=pcsd state=started
+
+  - name: Set up authentication between for hacluster user
+    command: /usr/bin/echo CHANGEME | passwd --stdin hacluster
+...
