@@ -26,7 +26,6 @@
       - tree
       - bind-utils
       - mlocate
-      - python-firewall
       - firewalld
       - libselinux-python
 
